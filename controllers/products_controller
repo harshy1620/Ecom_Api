@@ -1,0 +1,48 @@
+const Product = require('../models/product');
+
+// Controller to create a new product -- CREATE PRODUCT
+module.exports.create = function(req, res){
+    const newProduct = new Product({
+        name: req.body.name,
+        quantity: req.body.quantity
+    });
+    newProduct.save()
+        .then((product) => {res.send({data: product})})
+        .catch((err) => {res.send(err)})
+}
+
+// Controller to show all products -- READ PRODUCTS
+module.exports.products = function(req, res){                   
+    Product.find()
+    .then((foundProducts)=>{res.send({products:foundProducts})})
+    .catch((err) => {res.send(err)});
+}
+
+// Controller to delete a product  -- DELETE PRODUCT
+module.exports.delete = function(req, res){
+    Product.deleteOne({_id: req.params.productID})
+        .then(data => { res.send({message: "product deleted successfully"})})
+        .catch(err => {res.send(err)});
+}
+
+// Controller to update the product quantity
+module.exports.updateQunatity = function(req, res){
+    const ID = req.params.productID;
+    // finding the product using id passed in params
+    Product.findById(ID)
+        .then((found)=>{
+            // quantityQuantity = oldQuantity(already in data base) +  newQyuantity(increase/decrease)
+            const newQty = parseInt(found.quantity) + parseInt(req.query.number);
+            // update the product's quantity
+            Product.findByIdAndUpdate(ID, {quantity: newQty})
+                .then((updatedProduct) =>{
+                    updatedProduct.quantity = newQty;
+                    res.send({
+                        product: updatedProduct,
+                        message: 'updated successfully.'
+                    });
+                })
+                .catch(err => {res.send(err);})
+        })
+        .catch((err)=>{res.send(err)});
+}
